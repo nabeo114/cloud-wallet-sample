@@ -1,0 +1,9 @@
+# Dependencies
+node_modules/
+
+artifacts/
+cache/
+
+data/
+
+.env
