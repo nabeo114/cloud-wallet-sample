@@ -2,8 +2,9 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const { generateWallet, getWalletInfo } = require('./scripts/walletUtils');
-const { deployContract, getContractInfo } = require('./scripts/deploy');
 const { compileContracts } = require('./scripts/compile');
+const { deployContract, getContractInfo } = require('./scripts/deploy');
+const { getAssetInfo } = require('./scripts/assetUtils');
 
 const app = express();
 const port = 5000;
@@ -62,6 +63,21 @@ app.get('/get-contract-info', async (req, res) => {
       return res.status(404).json({ error: 'Contract not found' });
     }
     res.json(contractData);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// NFTメタデータを取得するエンドポイント
+app.get('/assets/:tokenId', async (req, res) => {
+  const { tokenId } = req.params;
+
+  try {
+    const assetData = await getAssetInfo(tokenId);
+    if (!assetData) {
+      return res.status(404).json({ error: 'Asset not found' });
+    }
+    res.json(assetData);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
