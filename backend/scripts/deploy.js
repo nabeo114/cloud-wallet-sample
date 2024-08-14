@@ -68,7 +68,7 @@ async function deployContract() {
 
     return contractData;
   } catch (error) {
-    throw new Error(`Failed to deply contract: ${error.message}`);
+    throw new Error(`Failed to deploy contract: ${error.message}`);
   }
 };
 

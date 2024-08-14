@@ -1,9 +1,6 @@
-const { ethers } = require('ethers');
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const fs = require('fs');
-const path = require('path');
 const { generateWallet, getWalletInfo } = require('./scripts/walletUtils');
 const { deployContract, getContractInfo } = require('./scripts/deploy');
 const { compileContracts } = require('./scripts/compile');
