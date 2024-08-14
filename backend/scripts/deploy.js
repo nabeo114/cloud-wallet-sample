@@ -1,10 +1,10 @@
 require('dotenv').config();
 const { ethers } = require('hardhat');
-const { formatAbi } = require('@ethersproject/abi');
 const { getWallet } = require('./walletUtils');
 const fs = require('fs');
 const path = require('path');
 
+// プロバイダーURLの設定（環境変数からInfuraのAPIキーを取得）
 const providerUrl = `https://polygon-amoy.infura.io/v3/${process.env.INFURA_API_KEY}`;
 
 // ファイル保存用ディレクトリのパスを設定（カレントディレクトリの一つ上の階層にあるdataディレクトリ）
@@ -16,16 +16,17 @@ if (!fs.existsSync(saveDirectory)) {
 // コントラクト情報ファイルのパスを設定（カレントディレクトリの一つ上の階層にあるdataディレクトリ内のcontract.jsonファイル）
 const contractFilePath = path.join(__dirname, '..', 'data', 'contract.json');
 
-// デプロイ用の関数を定義
+// コントラクトをデプロイする非同期関数
 async function deployContract() {
   try {
-    // ファイルをチェックして、コントラクトがデプロイ済みかを確認
+    // コントラクトがすでにデプロイされているかどうかを確認
     if (fs.existsSync(contractFilePath)) {
       throw new Error('Contract already deployed');
     }
 
     console.log('Starting deployment...');
 
+    // ウォレットの取得
     const wallet = await getWallet();
     if (!wallet) {
       return null;
@@ -34,14 +35,14 @@ async function deployContract() {
     // プロバイダーの設定
     const provider = new ethers.JsonRpcProvider(providerUrl);
 
-    // プロバイダーをウォレットに設定
+    // ウォレットにプロバイダーを接続
     const walletWithProvider = wallet.connect(provider);
 
     // コントラクトをデプロイ
     const myToken = await ethers.deployContract('MyToken', [1000000], walletWithProvider);
     console.log('Contract deployment transaction sent.');
 
-    // デプロイメントが完了するまで待機
+    // デプロイ完了まで待機
     await myToken.waitForDeployment();
     console.log('Contract deployed.');
 
@@ -61,15 +62,11 @@ async function deployContract() {
       abi: contractABI,
     };
 
-    // 外部ファイルに保存
+    // コントラクト情報を外部ファイルに保存
     const filePath = path.join(saveDirectory, 'contract.json');
     fs.writeFileSync(filePath, JSON.stringify(contractData, null, 2));
 
-    return {
-      contractAddress: txReceipt.contractAddress,
-      transactionHash: txReceipt.hash,
-      abi: contractABI,
-    };
+    return contractData;
   } catch (error) {
     throw new Error(`Failed to deply contract: ${error.message}`);
   }
@@ -85,12 +82,8 @@ async function getContractInfo() {
     }
 
     // コントラクト情報ファイルの内容を読み込み、JSON形式で解析
-    const walletData = JSON.parse(fs.readFileSync(contractFilePath, 'utf-8'));
-    return {
-      contractAddress: walletData.contractAddress,
-      transactionHash: walletData.transactionHash,
-      abi: walletData.abi,
-    };
+    const contractData = JSON.parse(fs.readFileSync(contractFilePath, 'utf-8'));
+    return contractData;
   } catch (error) {
     throw new Error(`Failed to get contract info: ${error.message}`);
   }

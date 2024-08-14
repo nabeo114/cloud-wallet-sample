@@ -11,7 +11,7 @@ if (!fs.existsSync(saveDirectory)) {
 // ウォレットファイルのパスを設定（カレントディレクトリの一つ上の階層にあるdataディレクトリ内のwallet.jsonファイル）
 const walletFilePath = path.join(__dirname, '..', 'data', 'wallet.json');
 
-// ウォレットを生成し、ファイルに保存する関数
+// ウォレットを生成し、ファイルに保存する非同期関数
 async function generateWallet(password) {
   try {
     // ファイルをチェックして、ウォレットが既に存在するかを確認
@@ -27,14 +27,13 @@ async function generateWallet(password) {
 
     // パスワードとKeystore JSONを一緒に保存するオブジェクトを作成
     const walletData = {
-      password: password,
+      password: password, // 本番環境では、パスワードを平文で保存しないことが推奨される
       address: wallet.address,
       keystoreJson: keystoreJson,
     };
 
     // 外部ファイルに保存
-    const filePath = path.join(saveDirectory, 'wallet.json');
-    fs.writeFileSync(filePath, JSON.stringify(walletData, null, 2));
+    fs.writeFileSync(walletFilePath, JSON.stringify(walletData, null, 2));
 
     return {
       address: wallet.address,
@@ -42,26 +41,6 @@ async function generateWallet(password) {
     };
   } catch (error) {
     throw new Error(`Failed to generate wallet: ${error.message}`);
-  }
-};
-
-// ウォレットのアドレスとKeystore JSONを取得する非同期関数
-async function getWalletInfo() {
-  try {
-    // ウォレットファイルが存在しない場合の処理
-    if (!fs.existsSync(walletFilePath)) {
-      console.warn('Wallet file not found. Returning null.');
-      return null;
-    }
-
-    // ウォレットファイルの内容を読み込み、JSON形式で解析
-    const walletData = JSON.parse(fs.readFileSync(walletFilePath, 'utf-8'));
-    return {
-      address: walletData.address,
-      keystoreJson: walletData.keystoreJson,
-    };
-  } catch (error) {
-    throw new Error(`Failed to get wallet info: ${error.message}`);
   }
 };
 
@@ -87,8 +66,28 @@ async function getWallet() {
   }
 };
 
+// ウォレットのアドレスとKeystore JSONを取得する非同期関数
+async function getWalletInfo() {
+  try {
+    // ウォレットファイルが存在しない場合の処理
+    if (!fs.existsSync(walletFilePath)) {
+      console.warn('Wallet file not found. Returning null.');
+      return null;
+    }
+
+    // ウォレットファイルの内容を読み込み、JSON形式で解析
+    const walletData = JSON.parse(fs.readFileSync(walletFilePath, 'utf-8'));
+    return {
+      address: walletData.address,
+      keystoreJson: walletData.keystoreJson,
+    };
+  } catch (error) {
+    throw new Error(`Failed to get wallet info: ${error.message}`);
+  }
+};
+
 module.exports = {
   generateWallet,
-  getWalletInfo,
   getWallet,
+  getWalletInfo,
 };
