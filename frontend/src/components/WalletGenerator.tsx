@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Button, TextField, Card, CardContent, Typography, IconButton, InputAdornment, Alert, Tooltip } from '@mui/material';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
+import { Button, TextField, Card, CardContent, Typography, IconButton, InputAdornment, Tooltip, Alert } from '@mui/material';
+import { Visibility, VisibilityOff, ContentCopy } from '@mui/icons-material';
 
 const WalletGenerator: React.FC = () => {
   const [address, setAddress] = useState<string | null>(null);
@@ -11,6 +11,12 @@ const WalletGenerator: React.FC = () => {
 
   const handleClickShowPassword = () => {
     setShowPassword(!showPassword);
+  };
+
+  const handleCopyAddress = () => {
+    if (address) {
+      navigator.clipboard.writeText(address);
+    }
   };
 
   const generateWallet = async () => {
@@ -101,8 +107,20 @@ const WalletGenerator: React.FC = () => {
       {address && (
         <Card sx={{ mt: 3 }}>
           <CardContent>
-            <Typography variant="h6">Wallet Address:</Typography>
-            <Typography variant="body1" color="textSecondary">{address}</Typography>
+            <Typography variant="h6">Address:</Typography>
+            <Typography variant="body1" color="textSecondary">
+              {address}
+              <Tooltip title="Copy to clipboard" placement="top">
+                <IconButton
+                  aria-label="copy wallet address"
+                  onClick={handleCopyAddress}
+                  edge="end"
+                  sx={{ ml: 1 }}
+                >
+                <ContentCopy />
+                </IconButton>
+              </Tooltip>
+            </Typography>
           </CardContent>
         </Card>
       )}

@@ -6,7 +6,7 @@ import ContractAccessor from './components/ContractAccessor';
 
 const App: React.FC = () => {
   return (
-    <Container maxWidth="sm">
+    <Container maxWidth="md">
       <Box sx={{ textAlign: 'center', mt: 5 }}>
         <Typography variant="h4" gutterBottom>
           1. Wallet Generator

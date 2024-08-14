@@ -1,11 +1,24 @@
 import React, { useState } from 'react';
-import { Button, TextField, Card, CardContent, Typography, Alert } from '@mui/material';
+import { Button, TextField, Card, CardContent, Typography, IconButton, Tooltip, Alert } from '@mui/material';
+import { ContentCopy } from '@mui/icons-material';
 
 const ContractDeployer: React.FC = () => {
   const [contractAddress, setContractAddress] = useState<string | null>(null);
   const [transactionHash, setTransactionHash] = useState<string | null>(null);
   const [abi, setAbi] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const handleCopyContractAddress = () => {
+    if (contractAddress) {
+      navigator.clipboard.writeText(contractAddress);
+    }
+  };
+
+  const handleCopyTransactionHash = () => {
+    if (transactionHash) {
+      navigator.clipboard.writeText(transactionHash);
+    }
+  };
 
   const deployContract = async () => {
     setError(null);
@@ -74,7 +87,19 @@ const ContractDeployer: React.FC = () => {
         <Card sx={{ mt: 3 }}>
           <CardContent>
             <Typography variant="h6">Contract Address:</Typography>
-            <Typography variant="body1" color="textSecondary">{contractAddress}</Typography>
+            <Typography variant="body1" color="textSecondary">
+              {contractAddress}
+              <Tooltip title="Copy to clipboard" placement="top">
+                <IconButton
+                  aria-label="copy contract address"
+                  onClick={handleCopyContractAddress}
+                  edge="end"
+                  sx={{ ml: 1 }}
+                >
+                <ContentCopy />
+                </IconButton>
+              </Tooltip>
+            </Typography>
           </CardContent>
         </Card>
       )}
@@ -82,15 +107,19 @@ const ContractDeployer: React.FC = () => {
         <Card sx={{ mt: 3 }}>
           <CardContent>
             <Typography variant="h6">Transaction Hash:</Typography>
-            <TextField
-              fullWidth
-              multiline
-              rows={2}
-              value={transactionHash}
-              variant="outlined"
-              InputProps={{ readOnly: true }}
-              sx={{ mt: 1 }}
-            />
+            <Typography variant="body1" color="textSecondary">
+              {transactionHash}
+              <Tooltip title="Copy to clipboard" placement="top">
+                <IconButton
+                  aria-label="copy transaction hash"
+                  onClick={handleCopyTransactionHash}
+                  edge="end"
+                  sx={{ ml: 1 }}
+                >
+                <ContentCopy />
+                </IconButton>
+              </Tooltip>
+            </Typography>
           </CardContent>
         </Card>
       )}

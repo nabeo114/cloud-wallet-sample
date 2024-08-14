@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Web3 from 'web3';
-import { Button, TextField, Card, CardContent, Typography, Alert } from '@mui/material';
+import { Button, Card, CardContent, Typography, Alert } from '@mui/material';
 
 const providerUrl = `https://polygon-amoy.infura.io/v3/891caf6a97ed4af6a314a6ba15fd63d1`;
 
@@ -10,6 +10,7 @@ const ContractAccessor: React.FC = () => {
   const [ownerBalance, setOwnerBalance] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // コントラクト情報をロード
   const loadContract = async () => {
     setError(null);
     try {
@@ -27,7 +28,10 @@ const ContractAccessor: React.FC = () => {
       }
 
       const data = await response.json();
-      initializeWeb3AndContract(data.contractAddress, data.abi);
+      const contractInstance = initializeWeb3AndContract(data.contractAddress, data.abi);
+      if (contractInstance) {
+        fetchOwnerBalance(contractInstance);
+      }
     } catch (error) {
       const errorMessage = (error as Error).message;
       console.error('Error loading contract:', errorMessage);
@@ -35,40 +39,36 @@ const ContractAccessor: React.FC = () => {
     }
   };
 
+  // Web3とコントラクトの初期化
   const initializeWeb3AndContract = (address: string, abi: any) => {
     try {
-        const web3Instance = new Web3(providerUrl);
-        setWeb3(web3Instance);
+      const web3Instance = new Web3(providerUrl);
+      setWeb3(web3Instance);
 
-        const parsedAbi = JSON.parse(abi);
+      const parsedAbi = JSON.parse(abi);
+      const contractInstance = new web3Instance.eth.Contract(parsedAbi, address);
+      setContract(contractInstance);
 
-        const contractInstance = new web3Instance.eth.Contract(parsedAbi, address);
-        setContract(contractInstance);
-
-      // コントラクトのbalanceOfメソッドを呼び出してオーナーのバランスを取得
-      if (contractInstance) {
-        // まずオーナーのアドレスを取得
-        contractInstance.methods.owner().call()
-          .then((ownerAddress: any) => {
-            console.log(ownerAddress);
-            // 取得したオーナーのアドレスでbalanceOfメソッドを呼び出す
-            return contractInstance.methods.balanceOf(ownerAddress).call();
-          })
-          .then((balance: any) => {
-            setOwnerBalance(balance);
-            console.log(`Owner's balance: ${balance}`);
-          })
-          .catch((err: Error) => {
-            const errorMessage = err.message;
-            console.error('Error fetching owner balance:', errorMessage);
-            setError(errorMessage);
-          });
-      }
+      return contractInstance;
     } catch (error) {
-        const errorMessage = (error as Error).message;
-        console.error('Error initializing Web3 or contract:', errorMessage);
-        setError(errorMessage);
-      }
+      const errorMessage = (error as Error).message;
+      console.error('Error initializing Web3 or contract:', errorMessage);
+      setError(errorMessage);
+      return null;
+    }
+  };
+
+  // オーナーの残高を取得
+  const fetchOwnerBalance = async (contractInstance: any) => {
+    try {
+      const ownerAddress = await contractInstance.methods.owner().call();
+      const balance = await contractInstance.methods.balanceOf(ownerAddress).call();
+      setOwnerBalance(balance);
+    } catch (err) {
+      const errorMessage = (err as Error).message;
+      console.error('Error fetching owner balance:', errorMessage);
+      setError(errorMessage);
+    }
   };
 
   const callContractMethod = async (methodName: string, ...params: any[]) => {
@@ -95,7 +95,7 @@ const ContractAccessor: React.FC = () => {
       {ownerBalance && (
         <Card sx={{ mt: 3 }}>
           <CardContent>
-            <Typography variant="h6" >Owner's Balance:</Typography>
+            <Typography variant="h6">Owner's Balance:</Typography>
             <Typography variant="body1" color="textSecondary">{ownerBalance.toString()}</Typography>
           </CardContent>
         </Card>
