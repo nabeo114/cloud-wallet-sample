@@ -2,6 +2,7 @@ import React from 'react';
 import { Container, Box, Typography, Divider } from '@mui/material';
 import WalletGenerator from './components/WalletGenerator';
 import ContractDeployer from './components/ContractDeployer';
+import ContractAccessor from './components/ContractAccessor';
 
 const App: React.FC = () => {
   return (
@@ -16,6 +17,11 @@ const App: React.FC = () => {
           2. Contract Deployer
         </Typography>
         <ContractDeployer />
+        <Divider sx={{ my: 4 }} />
+        <Typography variant="h4" gutterBottom>
+          3. Contract Accessor
+        </Typography>
+        <ContractAccessor />
       </Box>
     </Container>
   );

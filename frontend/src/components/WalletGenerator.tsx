@@ -94,7 +94,7 @@ const WalletGenerator: React.FC = () => {
       <Button variant="contained" color="primary" onClick={generateWallet} sx={{ mt: 2 }}>
         Generate Wallet
       </Button>
-      <Button variant="contained" color="primary" onClick={getWalletInfo} sx={{ mt: 2, ml: 2 }}>
+      <Button variant="contained" color="secondary" onClick={getWalletInfo} sx={{ mt: 2, ml: 2 }}>
         Get Wallet Info
       </Button>
       {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}

@@ -63,7 +63,7 @@ const ContractDeployer: React.FC = () => {
 
   return (
     <>
-      <Button variant="contained" color="secondary" onClick={deployContract} sx={{ mt: 2 }}>
+      <Button variant="contained" color="primary" onClick={deployContract} sx={{ mt: 2 }}>
         Deploy Contract
       </Button>
       <Button variant="contained" color="secondary" onClick={getContractInfo} sx={{ mt: 2, ml: 2 }}>
