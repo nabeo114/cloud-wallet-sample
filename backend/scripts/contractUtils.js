@@ -10,17 +10,16 @@ if (!fs.existsSync(saveDirectory)) {
 // コントラクト情報ファイルのパス
 const contractFilePath = path.join(__dirname, '..', 'data', 'contract.json');
 
-// コントラクトアドレスとトランザクションハッシュ、ABIを保存する非同期関数
+// コントラクト情報を保存する非同期関数
 async function saveContractInfo(contractData) {
   try {
     await fs.promises.writeFile(contractFilePath, JSON.stringify(contractData, null, 2));
   } catch (error) {
-    console.error(`Failed to save contract info: ${error.message}`);
-    throw error;
+    throw new Error(`Failed to save contract info: ${error.message}`);
   }
 }
 
-// コントラクトアドレスとトランザクションハッシュ、ABIを取得する非同期関数
+// コントラクト情報を取得する非同期関数
 async function getContractInfo() {
   try {
     // コントラクト情報ファイルが存在しない場合の処理

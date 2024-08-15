@@ -5,6 +5,7 @@ const { generateWallet, getWalletInfo } = require('./scripts/walletUtils');
 const { compileContracts } = require('./scripts/compile');
 const { deployContract } = require('./scripts/deploy');
 const { getContractInfo } = require('./scripts/contractUtils');
+const { transferTokens } = require('./scripts/contractMethods');
 const { getAssetInfo } = require('./scripts/assetUtils');
 
 const app = express();
@@ -74,11 +75,11 @@ app.post('/transfer-tokens', async (req, res) => {
   const { recipientAddress, transferAmount } = req.body;
 
   try {
-    const result = await transferTokens(recipientAddress, transferAmount);
-    if (!result) {
+    const txHash = await transferTokens(recipientAddress, transferAmount);
+    if (!txHash) {
       return res.status(500).json({ error: 'Failed to transfer tokens' });
     }
-    res.status(200).json({ success: true });
+    res.status(200).json({ transactionHash: txHash });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

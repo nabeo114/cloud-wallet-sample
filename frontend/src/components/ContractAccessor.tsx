@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Web3 from 'web3';
-import { Button, TextField, Card, CardContent, Typography, Tooltip, Alert } from '@mui/material';
+import { Button, TextField, Card, CardContent, Typography, IconButton, Tooltip, Alert } from '@mui/material';
+import { ContentCopy } from '@mui/icons-material';
 
 const providerUrl = `https://polygon-amoy.infura.io/v3/891caf6a97ed4af6a314a6ba15fd63d1`;
 
@@ -10,11 +11,21 @@ const ContractAccessor: React.FC = () => {
   const [totalSupply, setTotalSupply] = useState<string | null>(null);
   const [balance, setBalance] = useState<string | null>(null);
   const [address, setAddress] = useState<string>('');
-  const [error, setError] = useState<string | null>(null);
+  const [recipientAddress, setRecipientAddress] = useState<string>('');
+  const [transferAmount, setTransferAmount] = useState<string>('');
+  const [transactionHash, setTransactionHash] = useState<string | null>(null);
+  const [contractError, setContractError] = useState<string | null>(null);
+  const [transferError, setTransferError] = useState<string | null>(null);
+
+  const handleCopyTransactionHash = () => {
+    if (transactionHash) {
+      navigator.clipboard.writeText(transactionHash);
+    }
+  };
 
   // コントラクト情報をロード
   const loadContract = async () => {
-    setError(null);
+    setContractError(null);
     try {
       const response = await fetch('http://localhost:5000/get-contract-info', {
         method: 'GET',
@@ -25,24 +36,24 @@ const ContractAccessor: React.FC = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        setError(errorData.error);
+        setContractError(errorData.error);
         return;
       }
 
       const data = await response.json();
-      const contractInstance = initializeWeb3AndContract(data.contractAddress, data.abi);
+      const contractInstance = createContract(data.contractAddress, data.abi);
       if (contractInstance) {
         fetchTotalSupply(contractInstance);
       }
     } catch (error) {
       const errorMessage = (error as Error).message;
       console.error('Error loading contract:', errorMessage);
-      setError(errorMessage);
+      setContractError(errorMessage);
     }
   };
 
-  // Web3とコントラクトの初期化
-  const initializeWeb3AndContract = (address: string, abi: any) => {
+  // コントラクトオブジェクトの生成
+  const createContract = (address: string, abi: any) => {
     try {
       const web3Instance = new Web3(providerUrl);
       setWeb3(web3Instance);
@@ -54,8 +65,8 @@ const ContractAccessor: React.FC = () => {
       return contractInstance;
     } catch (error) {
       const errorMessage = (error as Error).message;
-      console.error('Error initializing Web3 or contract:', errorMessage);
-      setError(errorMessage);
+      console.error('Error creating contract:', errorMessage);
+      setContractError(errorMessage);
       return null;
     }
   };
@@ -68,15 +79,16 @@ const ContractAccessor: React.FC = () => {
     } catch (err) {
       const errorMessage = (err as Error).message;
       console.error('Error fetching total supply:', errorMessage);
-      setError(errorMessage);
+      setContractError(errorMessage);
     }
   };
 
   // 指定したアドレスの残高を取得
   const fetchBalance = async () => {
-    setError(null);
+    setContractError(null);
+    setBalance(null);
     if (!contract || !address) {
-      setError('Contract not loaded or address not provided');
+      setContractError('Contract not loaded or address not provided');
       return;
     }
 
@@ -85,49 +97,135 @@ const ContractAccessor: React.FC = () => {
       setBalance(balance);
     } catch (err) {
       const errorMessage = (err as Error).message;
-      console.error('Error fetching owner balance:', errorMessage);
-      setError(errorMessage);
+      console.error('Error fetching balance:', errorMessage);
+      setContractError(errorMessage);
+    }
+  };
+
+  const transferTokens = async () => {
+    setTransferError(null);
+    setTransactionHash(null);
+    if (!recipientAddress || !transferAmount) {
+      setTransferError('Address or amount not provided');
+      return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:5000/transfer-tokens', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ recipientAddress, transferAmount }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        setTransferError(errorData.error);
+        return;
+      }
+
+      const data = await response.json();
+      setTransactionHash(data.transactionHash);
+    } catch (error) {
+      const errorMessage = (error as Error).message;
+      console.error('Error transferring tokens:', errorMessage);
+      setTransferError(errorMessage);
     }
   };
 
   return (
     <>
-      <Button variant="contained" color="primary" onClick={loadContract} sx={{ mt: 2 }}>
-        Load Contract
-      </Button>
-      {totalSupply && (
-        <Card sx={{ mt: 3 }}>
-          <CardContent>
-            <Typography variant="h6">Total Supply:</Typography>
-            <Typography variant="body1" color="textSecondary">{totalSupply.toString()}</Typography>
-          </CardContent>
-        </Card>
-      )}
-      {contract && (
-        <>
-          <Tooltip title="Please enter the address for which you want to check the balance." placement="top" arrow>
+      <Card sx={{ mt: 3 }}>
+        <CardContent>
+          <Button variant="contained" color="primary" onClick={loadContract} sx={{ mt: 2 }}>
+            Load Contract
+          </Button>
+          {totalSupply && (
+            <Card sx={{ mt: 3 }}>
+              <CardContent>
+                <Typography variant="h6">Total Supply:</Typography>
+                <Typography variant="body1" color="textSecondary">{totalSupply.toString()}</Typography>
+              </CardContent>
+            </Card>
+          )}
+          {contract && (
+            <>
+            <Card sx={{ mt: 3 }}>
+              <CardContent>
+                <Tooltip title="Please enter the address for which you want to check the balance." placement="top" arrow>
+                  <TextField
+                    label="Address"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    fullWidth
+                    sx={{ mt: 3 }}
+                  />
+                </Tooltip>
+                <Button variant="contained" color="primary" onClick={fetchBalance} sx={{ mt: 2 }}>
+                  Get Balance
+                </Button>
+                {balance !== null && (
+                  <Card sx={{ mt: 3 }}>
+                    <CardContent>
+                      <Typography variant="h6">Balance:</Typography>
+                      <Typography variant="body1" color="textSecondary">{balance.toString()}</Typography>
+                    </CardContent>
+                  </Card>
+                )}
+              </CardContent>
+            </Card>
+            </>
+          )}
+          {contractError && <Alert severity="error" sx={{ mt: 2 }}>{contractError}</Alert>}
+        </CardContent>
+      </Card>
+      <Card sx={{ mt: 3 }}>
+        <CardContent>
+          <Tooltip title="Please enter the recipient address." placement="top" arrow>
             <TextField
-              label="Address"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
+              label="Recipient Address"
+              value={recipientAddress}
+              onChange={(e) => setRecipientAddress(e.target.value)}
               fullWidth
               sx={{ mt: 3 }}
             />
           </Tooltip>
-          <Button variant="contained" color="primary" onClick={fetchBalance} sx={{ mt: 2 }}>
-            Get Balance
+          <Tooltip title="Please enter the transfer Amount." placement="top" arrow>
+            <TextField
+              label="Transfer Amount"
+              value={transferAmount}
+              onChange={(e) => setTransferAmount(e.target.value)}
+              fullWidth
+              sx={{ mt: 3 }}
+            />
+          </Tooltip>
+          <Button variant="contained" color="primary" onClick={transferTokens} sx={{ mt: 2 }}>
+            Transfer Tokens
           </Button>
-        </>
-      )}
-      {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
-      {balance !== null && (
-        <Card sx={{ mt: 3 }}>
-          <CardContent>
-            <Typography variant="h6">Balance:</Typography>
-            <Typography variant="body1" color="textSecondary">{balance.toString()}</Typography>
-          </CardContent>
-        </Card>
-      )}
+          {transactionHash && (
+            <Card sx={{ mt: 3 }}>
+              <CardContent>
+                <Typography variant="h6">Transaction Hash:</Typography>
+                <Typography variant="body1" color="textSecondary">
+                  {transactionHash}
+                  <Tooltip title="Copy to clipboard" placement="top">
+                    <IconButton
+                      aria-label="copy transaction hash"
+                      onClick={handleCopyTransactionHash}
+                      edge="end"
+                      sx={{ ml: 1 }}
+                    >
+                    <ContentCopy />
+                    </IconButton>
+                  </Tooltip>
+                </Typography>
+              </CardContent>
+            </Card>
+          )}
+          {transferError && <Alert severity="error" sx={{ mt: 2 }}>{transferError}</Alert>}
+        </CardContent>
+      </Card>
     </>
   );
 };

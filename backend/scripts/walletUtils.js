@@ -2,13 +2,13 @@ const { ethers } = require('ethers');
 const fs = require('fs');
 const path = require('path');
 
-// ファイル保存用ディレクトリのパスを設定（カレントディレクトリの一つ上の階層にあるdataディレクトリ）
+// ウォレットを保存するディレクトリのパス
 const saveDirectory = path.join(__dirname, '..', 'data');
 if (!fs.existsSync(saveDirectory)) {
   fs.mkdirSync(saveDirectory, { recursive: true });
 };
 
-// ウォレットファイルのパスを設定（カレントディレクトリの一つ上の階層にあるdataディレクトリ内のwallet.jsonファイル）
+// ウォレットファイルのパス
 const walletFilePath = path.join(__dirname, '..', 'data', 'wallet.json');
 
 // ウォレットを生成し、ファイルに保存する非同期関数
