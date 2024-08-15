@@ -54,7 +54,7 @@ async function getWallet() {
     }
 
     // ウォレットファイルの内容を読み込み、JSON形式で解析
-    const walletData = JSON.parse(fs.readFileSync(walletFilePath, 'utf-8'));
+    const walletData = JSON.parse(await fs.promises.readFile(walletFilePath, 'utf-8'));
     const password = walletData.password;
     const keystoreJson = walletData.keystoreJson;
 
@@ -76,7 +76,7 @@ async function getWalletInfo() {
     }
 
     // ウォレットファイルの内容を読み込み、JSON形式で解析
-    const walletData = JSON.parse(fs.readFileSync(walletFilePath, 'utf-8'));
+    const walletData = JSON.parse(await fs.promises.readFile(walletFilePath, 'utf-8'));
     return {
       address: walletData.address,
       keystoreJson: walletData.keystoreJson,

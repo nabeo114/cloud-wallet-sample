@@ -28,6 +28,7 @@ const ContractDeployer: React.FC = () => {
         headers: {
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify({ 'contractName': 'MyToken', 'constructorArgs': [] }),
       });
 
       if (!response.ok) {
@@ -51,10 +52,11 @@ const ContractDeployer: React.FC = () => {
     setError(null);
     try {
       const response = await fetch('http://localhost:5000/get-contract-info', {
-        method: 'GET',
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify({ 'contractName': 'MyToken' }),
       });
 
       if (!response.ok) {

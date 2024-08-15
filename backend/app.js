@@ -45,9 +45,11 @@ app.get('/get-wallet-info', async (req, res) => {
 
 // コントラクトをデプロイするエンドポイント
 app.post('/deploy-contract', async (req, res) => {
+  const { contractName, constructorArgs } = req.body;
+
   try {
     await compileContracts();
-    const contractData = await deployContract();
+    const contractData = await deployContract(contractName, constructorArgs);
     if (!contractData) {
       return res.status(404).json({ error: 'Wallet not found' });
     }
@@ -58,9 +60,11 @@ app.post('/deploy-contract', async (req, res) => {
 });
 
 // コントラクトアドレスとトランザクションハッシュ、ABIを取得するエンドポイント
-app.get('/get-contract-info', async (req, res) => {
+app.post('/get-contract-info', async (req, res) => {
+  const { contractName } = req.body;
+
   try {
-    const contractData = await getContractInfo();
+    const contractData = await getContractInfo(contractName);
     if (!contractData) {
       return res.status(404).json({ error: 'Contract not found' });
     }

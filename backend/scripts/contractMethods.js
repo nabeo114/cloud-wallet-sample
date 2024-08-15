@@ -6,10 +6,10 @@ const { getContractInfo } = require('./contractUtils');
 const providerUrl = `https://polygon-amoy.infura.io/v3/${process.env.INFURA_API_KEY}`;
 
 // コントラクトオブジェクトを生成する非同期関数
-async function createContract() {
+async function createContract(contractName) {
   try {
     // コントラクト情報の取得
-    const contractData = await getContractInfo();
+    const contractData = await getContractInfo(contractName);
     if (!contractData) {
       throw new Error('Contract not deployed');
     }
@@ -34,7 +34,7 @@ async function createContract() {
 async function transferTokens(recipientAddress, transferAmount) {
   try {
     // コントラクトオブジェクトの生成
-    const contract = await createContract();
+    const contract = await createContract('MyToken');
 
     // トークンを転送（コントラクトのメソッドを実行）
 //    const txReceipt = await contract.transfer(recipientAddress, ethers.utils.parseUnits(transferAmount, 'ether'));
@@ -45,12 +45,12 @@ async function transferTokens(recipientAddress, transferAmount) {
 
     console.log(`Transferred ${transferAmount} tokens to ${recipientAddress}`);
     console.log(`Transaction hash: ${tx.hash}`);
-    
+
     return tx.hash;
   } catch (error) {
     throw new Error(`Failed to transfer tokens: ${error.message}`);
   }
-};
+}
 
 module.exports = {
   transferTokens,

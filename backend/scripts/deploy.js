@@ -7,15 +7,15 @@ const { saveContractInfo, getContractInfo } = require('./contractUtils');
 const providerUrl = `https://polygon-amoy.infura.io/v3/${process.env.INFURA_API_KEY}`;
 
 // コントラクトをデプロイする非同期関数
-async function deployContract() {
+async function deployContract(contractName, constructorArgs = []) {
   try {
     // コントラクトがすでにデプロイされているかどうかを確認
-    const existingContract = await getContractInfo();
+    const existingContract = await getContractInfo(contractName);
     if (existingContract) {
-      throw new Error('Contract already deployed');
+      throw new Error(`${contractName} contract already deployed`);
     }
 
-    console.log('Starting deployment...');
+    console.log(`Starting deployment of ${contractName}...`);
 
     // ウォレットの取得
     const wallet = await getWallet();
@@ -25,12 +25,10 @@ async function deployContract() {
 
     // プロバイダーの設定
     const provider = new ethers.JsonRpcProvider(providerUrl);
-
-    // ウォレットにプロバイダーを接続
     const walletWithProvider = wallet.connect(provider);
 
     // コントラクトをデプロイ
-    const myToken = await ethers.deployContract('MyToken', [1000000], walletWithProvider);
+    const myToken = await ethers.deployContract(contractName, constructorArgs, walletWithProvider);
     console.log('Contract deployment transaction sent.');
 
     // デプロイ完了まで待機
@@ -40,25 +38,23 @@ async function deployContract() {
     // トランザクションレシートを取得
     const txReceipt = await myToken.deploymentTransaction().wait();
     // ABIの取得
-//    const contractABI = JSON.stringify(myToken.interface.fragments);
     const contractABI = myToken.interface.formatJson();
 
     console.log(`Contract deployed at address: ${txReceipt.contractAddress}`);
     console.log(`Transaction hash: ${txReceipt.hash}`);
 
-    // コントラクトアドレスとトランザクションハッシュ、ABIを一緒に保存するオブジェクトを作成
     const contractData = {
       contractAddress: txReceipt.contractAddress,
       transactionHash: txReceipt.hash,
       abi: contractABI,
     };
 
-    // コントラクトアドレスとトランザクションハッシュ、ABIを保存
-    saveContractInfo(contractData);
+    // コントラクト情報の保存
+    await saveContractInfo(contractName, contractData);
 
     return contractData;
   } catch (error) {
-    throw new Error(`Failed to deploy contract: ${error.message}`);
+    throw new Error(`Failed to deploy ${contractName} contract: ${error.message}`);
   }
 };
 

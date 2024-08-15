@@ -4,9 +4,7 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 contract MyToken is ERC20 {
-  address public owner;
-  constructor(uint256 initialSupply) ERC20("MyToken", "MTK") {
-    owner = msg.sender;
-    _mint(owner, initialSupply);
-  }
+    constructor() ERC20("MyToken", "MTK") {
+        _mint(msg.sender, 1000000 * 10 ** decimals());
+    }
 }
