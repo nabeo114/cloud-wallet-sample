@@ -102,6 +102,7 @@ const ContractAccessor: React.FC = () => {
     }
   };
 
+  // トークンを転送
   const transferTokens = async () => {
     setTransferError(null);
     setTransactionHash(null);
@@ -182,7 +183,7 @@ const ContractAccessor: React.FC = () => {
       </Card>
       <Card sx={{ mt: 3 }}>
         <CardContent>
-          <Tooltip title="Please enter the recipient address." placement="top" arrow>
+          <Tooltip title="Please enter the recipient address to which you want to transfer the tokens." placement="top" arrow>
             <TextField
               label="Recipient Address"
               value={recipientAddress}
@@ -191,7 +192,7 @@ const ContractAccessor: React.FC = () => {
               sx={{ mt: 3 }}
             />
           </Tooltip>
-          <Tooltip title="Please enter the transfer Amount." placement="top" arrow>
+          <Tooltip title="Please enter the amount of tokens you want to transfer." placement="top" arrow>
             <TextField
               label="Transfer Amount"
               value={transferAmount}
