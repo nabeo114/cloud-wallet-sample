@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, TextField, Card, CardContent, Typography, IconButton, InputAdornment, Tooltip, Alert } from '@mui/material';
+import { Card, CardContent, Button, TextField, Typography, IconButton, InputAdornment, Divider, Tooltip, Alert } from '@mui/material';
 import { Visibility, VisibilityOff, ContentCopy } from '@mui/icons-material';
 
 const WalletGenerator: React.FC = () => {
@@ -104,44 +104,47 @@ const WalletGenerator: React.FC = () => {
         Get Wallet Info
       </Button>
       {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
-      {address && (
+      {(address || keystore) && (
         <Card sx={{ mt: 3 }}>
           <CardContent>
-            <Typography variant="h6">Address:</Typography>
-            <Typography variant="body1" color="textSecondary">
-              {address}
-              <Tooltip title="Copy to clipboard" placement="top">
-                <IconButton
-                  aria-label="copy wallet address"
-                  onClick={handleCopyAddress}
-                  edge="end"
-                  sx={{ ml: 1 }}
-                >
-                <ContentCopy />
-                </IconButton>
-              </Tooltip>
-            </Typography>
-          </CardContent>
-        </Card>
-      )}
-      {keystore && (
-        <Card sx={{ mt: 3 }}>
-          <CardContent>
-            <Typography variant="h6">Keystore JSON:</Typography>
-            <TextField
-              fullWidth
-              multiline
-              rows={10}
-              value={keystore}
-              variant="outlined"
-              margin="normal"
-              InputProps={{ readOnly: true }}
-            />
+            {address && (
+              <>
+                <Typography variant="h6">Address:</Typography>
+                <Typography variant="body1" color="textSecondary">
+                  {address}
+                  <Tooltip title="Copy to clipboard" placement="top">
+                    <IconButton
+                      aria-label="copy wallet address"
+                      onClick={handleCopyAddress}
+                      edge="end"
+                      sx={{ ml: 1 }}
+                    >
+                    <ContentCopy />
+                    </IconButton>
+                  </Tooltip>
+                </Typography>
+              </>
+            )}
+            <Divider sx={{ my: 2 }} />
+            {keystore && (
+              <>
+                <Typography variant="h6">Keystore JSON:</Typography>
+                <TextField
+                  fullWidth
+                  multiline
+                  rows={10}
+                  value={keystore}
+                  variant="outlined"
+                  margin="normal"
+                  InputProps={{ readOnly: true }}
+                />
+              </>
+            )}
           </CardContent>
         </Card>
       )}
     </>
-  );
+  )
 };
 
 export default WalletGenerator;

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Web3 from 'web3';
-import { Button, TextField, Card, CardContent, Typography, IconButton, Tooltip, Alert } from '@mui/material';
+import { Card, CardContent, Button, TextField, Typography, IconButton, Tooltip, Alert } from '@mui/material';
 import { ContentCopy } from '@mui/icons-material';
 
 const providerUrl = `https://polygon-amoy.infura.io/v3/891caf6a97ed4af6a314a6ba15fd63d1`;
@@ -152,30 +152,30 @@ const ContractAccessor: React.FC = () => {
           )}
           {contract && (
             <>
-            <Card sx={{ mt: 3 }}>
-              <CardContent>
-                <Tooltip title="Please enter the address for which you want to check the balance." placement="top" arrow>
-                  <TextField
-                    label="Address"
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
-                    fullWidth
-                    sx={{ mt: 3 }}
-                  />
-                </Tooltip>
-                <Button variant="contained" color="primary" onClick={fetchBalance} sx={{ mt: 2 }}>
-                  Get Balance
-                </Button>
-                {balance !== null && (
-                  <Card sx={{ mt: 3 }}>
-                    <CardContent>
-                      <Typography variant="h6">Balance:</Typography>
-                      <Typography variant="body1" color="textSecondary">{balance.toString()}</Typography>
-                    </CardContent>
-                  </Card>
-                )}
-              </CardContent>
-            </Card>
+              <Card sx={{ mt: 3 }}>
+                <CardContent>
+                  <Tooltip title="Please enter the address for which you want to check the balance." placement="top" arrow>
+                    <TextField
+                      label="Address"
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                      fullWidth
+                      sx={{ mt: 3 }}
+                    />
+                  </Tooltip>
+                  <Button variant="contained" color="primary" onClick={fetchBalance} sx={{ mt: 2 }}>
+                    Get Balance
+                  </Button>
+                  {balance !== null && (
+                    <Card sx={{ mt: 3 }}>
+                      <CardContent>
+                        <Typography variant="h6">Balance:</Typography>
+                        <Typography variant="body1" color="textSecondary">{balance.toString()}</Typography>
+                      </CardContent>
+                    </Card>
+                  )}
+                </CardContent>
+              </Card>
             </>
           )}
           {contractError && <Alert severity="error" sx={{ mt: 2 }}>{contractError}</Alert>}
