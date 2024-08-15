@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import Web3 from 'web3';
-import { Button, Card, CardContent, Typography, Alert } from '@mui/material';
+import { Button, TextField, Card, CardContent, Typography, Tooltip, Alert } from '@mui/material';
 
 const providerUrl = `https://polygon-amoy.infura.io/v3/891caf6a97ed4af6a314a6ba15fd63d1`;
 
 const ContractAccessor: React.FC = () => {
   const [web3, setWeb3] = useState<Web3 | null>(null);
   const [contract, setContract] = useState<any | null>(null);
-  const [ownerBalance, setOwnerBalance] = useState<string | null>(null);
+  const [totalSupply, setTotalSupply] = useState<string | null>(null);
+  const [balance, setBalance] = useState<string | null>(null);
+  const [address, setAddress] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
 
   // コントラクト情報をロード
@@ -30,7 +32,7 @@ const ContractAccessor: React.FC = () => {
       const data = await response.json();
       const contractInstance = initializeWeb3AndContract(data.contractAddress, data.abi);
       if (contractInstance) {
-        fetchOwnerBalance(contractInstance);
+        fetchTotalSupply(contractInstance);
       }
     } catch (error) {
       const errorMessage = (error as Error).message;
@@ -58,31 +60,33 @@ const ContractAccessor: React.FC = () => {
     }
   };
 
-  // オーナーの残高を取得
-  const fetchOwnerBalance = async (contractInstance: any) => {
+  // Total Supplyを取得
+  const fetchTotalSupply = async (contractInstance: any) => {
     try {
-      const ownerAddress = await contractInstance.methods.owner().call();
-      const balance = await contractInstance.methods.balanceOf(ownerAddress).call();
-      setOwnerBalance(balance);
+      const totalSupply = await contractInstance.methods.totalSupply().call();
+      setTotalSupply(totalSupply);
     } catch (err) {
       const errorMessage = (err as Error).message;
-      console.error('Error fetching owner balance:', errorMessage);
+      console.error('Error fetching total supply:', errorMessage);
       setError(errorMessage);
     }
   };
 
-  const callContractMethod = async (methodName: string, ...params: any[]) => {
-    if (contract) {
-      try {
-        const result = await contract.methods[methodName](...params).call();
-        console.log('Contract method result:', result);
-      } catch (err) {
-        const errorMessage = (err as Error).message;
-        console.error('Error calling contract method:', errorMessage);
-        setError(errorMessage);
-      }
-    } else {
-      setError('Contract not initialized');
+  // 指定したアドレスの残高を取得
+  const fetchBalance = async () => {
+    setError(null);
+    if (!contract || !address) {
+      setError('Contract not loaded or address not provided');
+      return;
+    }
+
+    try {
+      const balance = await contract.methods.balanceOf(address).call();
+      setBalance(balance);
+    } catch (err) {
+      const errorMessage = (err as Error).message;
+      console.error('Error fetching owner balance:', errorMessage);
+      setError(errorMessage);
     }
   };
 
@@ -91,12 +95,36 @@ const ContractAccessor: React.FC = () => {
       <Button variant="contained" color="primary" onClick={loadContract} sx={{ mt: 2 }}>
         Load Contract
       </Button>
-      {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
-      {ownerBalance && (
+      {totalSupply && (
         <Card sx={{ mt: 3 }}>
           <CardContent>
-            <Typography variant="h6">Owner's Balance:</Typography>
-            <Typography variant="body1" color="textSecondary">{ownerBalance.toString()}</Typography>
+            <Typography variant="h6">Total Supply:</Typography>
+            <Typography variant="body1" color="textSecondary">{totalSupply.toString()}</Typography>
+          </CardContent>
+        </Card>
+      )}
+      {contract && (
+        <>
+          <Tooltip title="Please enter the address for which you want to check the balance." placement="top" arrow>
+            <TextField
+              label="Address"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              fullWidth
+              sx={{ mt: 3 }}
+            />
+          </Tooltip>
+          <Button variant="contained" color="primary" onClick={fetchBalance} sx={{ mt: 2 }}>
+            Get Balance
+          </Button>
+        </>
+      )}
+      {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
+      {balance !== null && (
+        <Card sx={{ mt: 3 }}>
+          <CardContent>
+            <Typography variant="h6">Balance:</Typography>
+            <Typography variant="body1" color="textSecondary">{balance.toString()}</Typography>
           </CardContent>
         </Card>
       )}

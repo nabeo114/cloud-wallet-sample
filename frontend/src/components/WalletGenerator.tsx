@@ -74,7 +74,7 @@ const WalletGenerator: React.FC = () => {
 
   return (
     <>
-      <Tooltip title="Please enter a password to encrypt the keystore JSON when generating the wallet." placement="top">
+      <Tooltip title="Please enter a password to encrypt the keystore JSON when generating the wallet." placement="top" arrow>
         <TextField
           label="Password"
           type={showPassword ? 'text' : 'password'}
