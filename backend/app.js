@@ -3,7 +3,8 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const { generateWallet, getWalletInfo } = require('./scripts/walletUtils');
 const { compileContracts } = require('./scripts/compile');
-const { deployContract, getContractInfo } = require('./scripts/deploy');
+const { deployContract } = require('./scripts/deploy');
+const { getContractInfo } = require('./scripts/contractUtils');
 const { getAssetInfo } = require('./scripts/assetUtils');
 
 const app = express();
@@ -63,6 +64,21 @@ app.get('/get-contract-info', async (req, res) => {
       return res.status(404).json({ error: 'Contract not found' });
     }
     res.json(contractData);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// トークンを転送するエンドポイント
+app.post('/transfer-tokens', async (req, res) => {
+  const { recipientAddress, transferAmount } = req.body;
+
+  try {
+    const result = await transferTokens(recipientAddress, transferAmount);
+    if (!result) {
+      return res.status(500).json({ error: 'Failed to transfer tokens' });
+    }
+    res.status(200).json({ success: true });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

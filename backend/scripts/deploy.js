@@ -1,26 +1,17 @@
 require('dotenv').config();
 const { ethers } = require('hardhat');
 const { getWallet } = require('./walletUtils');
-const fs = require('fs');
-const path = require('path');
+const { saveContractInfo, getContractInfo } = require('./contractUtils');
 
 // プロバイダーURLの設定（環境変数からInfuraのAPIキーを取得）
 const providerUrl = `https://polygon-amoy.infura.io/v3/${process.env.INFURA_API_KEY}`;
-
-// ファイル保存用ディレクトリのパスを設定（カレントディレクトリの一つ上の階層にあるdataディレクトリ）
-const saveDirectory = path.join(__dirname, '..', 'data');
-if (!fs.existsSync(saveDirectory)) {
-  fs.mkdirSync(saveDirectory, { recursive: true });
-};
-
-// コントラクト情報ファイルのパスを設定（カレントディレクトリの一つ上の階層にあるdataディレクトリ内のcontract.jsonファイル）
-const contractFilePath = path.join(__dirname, '..', 'data', 'contract.json');
 
 // コントラクトをデプロイする非同期関数
 async function deployContract() {
   try {
     // コントラクトがすでにデプロイされているかどうかを確認
-    if (fs.existsSync(contractFilePath)) {
+    const existingContract = await getContractInfo();
+    if (existingContract) {
       throw new Error('Contract already deployed');
     }
 
@@ -62,9 +53,8 @@ async function deployContract() {
       abi: contractABI,
     };
 
-    // コントラクト情報を外部ファイルに保存
-    const filePath = path.join(saveDirectory, 'contract.json');
-    fs.writeFileSync(filePath, JSON.stringify(contractData, null, 2));
+    // コントラクトアドレスとトランザクションハッシュ、ABIを保存
+    saveContractInfo(contractData);
 
     return contractData;
   } catch (error) {
@@ -72,24 +62,6 @@ async function deployContract() {
   }
 };
 
-// コントラクトアドレスとトランザクションハッシュ、ABIを取得する非同期関数
-async function getContractInfo() {
-  try {
-    // コントラクト情報ファイルが存在しない場合の処理
-    if (!fs.existsSync(contractFilePath)) {
-      console.warn('Contract info file not found. Returning null.');
-      return null;
-    }
-
-    // コントラクト情報ファイルの内容を読み込み、JSON形式で解析
-    const contractData = JSON.parse(fs.readFileSync(contractFilePath, 'utf-8'));
-    return contractData;
-  } catch (error) {
-    throw new Error(`Failed to get contract info: ${error.message}`);
-  }
-};
-
 module.exports = {
   deployContract,
-  getContractInfo,
 };
