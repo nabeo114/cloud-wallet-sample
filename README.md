@@ -30,7 +30,7 @@ npm install
 npm start
 ```
 
-**Note**: To run the backend, you need to create a `.env` file in the `backend` directory and set the `INFURA_API_KEY` environment variable. Use your specific API key value for this variable, which you can obtain from your development environment.
+**Note**: To run the backend, you need to create a `.env` file in the `backend` directory and set the `INFURA_API_KEY` environment variable. You can obtain your API key by creating an account at [Infura](https://app.infura.io/). Use your specific API key value for this variable, which should be set as follows:
 
 ```plaintext
 INFURA_API_KEY=your_infura_api_key_here
