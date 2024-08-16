@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Web3 from 'web3';
-import { Card, CardContent, Button, TextField, Typography, IconButton, Tooltip, MenuItem, Select, InputLabel, FormControl, Alert } from '@mui/material';
+import { Card, CardContent, CardMedia, Button, TextField, Typography, IconButton, Divider, Tooltip, MenuItem, Select, InputLabel, FormControl, Alert } from '@mui/material';
 import { ContentCopy } from '@mui/icons-material';
 import { SelectChangeEvent } from '@mui/material/Select';
 
@@ -21,8 +21,9 @@ const ContractAccessor: React.FC = () => {
   const [balance, setBalance] = useState<string | null>(null);
   const [tokenId, setTokenId] = useState<number>(0);
   const [tokenURI, setTokenURI] = useState<string | null>(null);
+  const [tokenMetadata, setTokenMetadata] = useState<string | null>(null);
   const [recipientAddress, setRecipientAddress] = useState<string>('');
-  const [transferAmount, setTransferAmount] = useState<string>('');
+  const [transferAmount, setTransferAmount] = useState<number>(0);
   const [transactionHash, setTransactionHash] = useState<string | null>(null);
   const [contractError, setContractError] = useState<string | null>(null);
   const [transferError, setTransferError] = useState<string | null>(null);
@@ -30,6 +31,12 @@ const ContractAccessor: React.FC = () => {
   const handleCopyTransactionHash = () => {
     if (transactionHash) {
       navigator.clipboard.writeText(transactionHash);
+    }
+  };
+
+  const handleCopyTokenURI = () => {
+    if (tokenURI) {
+      navigator.clipboard.writeText(tokenURI);
     }
   };
 
@@ -42,8 +49,9 @@ const ContractAccessor: React.FC = () => {
     setBalance(null);
     setTokenId(0);
     setTokenURI(null);
+    setTokenMetadata(null);
     setRecipientAddress('');
-    setTransferAmount('');
+    setTransferAmount(0);
     setTransactionHash(null);
     setContractError(null);
     setTransferError(null);
@@ -137,6 +145,7 @@ const ContractAccessor: React.FC = () => {
   const fetchTokenURI = async () => {
     setContractError(null);
     setTokenURI(null);
+    setTokenMetadata(null);
     if (!contract) {
       setContractError('Contract not loaded');
       return;
@@ -152,12 +161,44 @@ const ContractAccessor: React.FC = () => {
     }
   };
 
+  // NFTメタデータを取得 (ERC721のみ)
+  const getMetadata = async () => {
+    setTransferError(null);
+    setTokenMetadata(null);
+    if (!tokenURI) {
+      setTransferError('Token URI not available');
+      return;
+    }
+
+    try {
+      let response = await fetch(tokenURI, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        setTransferError(errorData.error);
+        return;
+      }
+
+      const data = await response.json();
+      setTokenMetadata(JSON.stringify(data));
+    } catch (error) {
+      const errorMessage = (error as Error).message;
+      console.error('Error getting NFT metadata:', errorMessage);
+      setTransferError(errorMessage);
+    }
+  }
+
   // トークンを転送 (ERC20のみ)
   const transferTokens = async () => {
     setTransferError(null);
     setTransactionHash(null);
-    if (!recipientAddress || !transferAmount) {
-      setTransferError('Address or amount not provided');
+    if (!recipientAddress) {
+      setTransferError('Address not provided');
       return;
     }
 
@@ -258,7 +299,7 @@ const ContractAccessor: React.FC = () => {
                       sx={{ mt: 3 }}
                     />
                   </Tooltip>
-                  <Button variant="contained" color="primary" onClick={fetchBalance} sx={{ mt: 2 }}>
+                  <Button variant="outlined" color="primary" onClick={fetchBalance} sx={{ mt: 2 }}>
                     Get Balance
                   </Button>
                   {balance && (
@@ -287,14 +328,57 @@ const ContractAccessor: React.FC = () => {
                       type="number"
                     />
                   </Tooltip>
-                  <Button variant="contained" color="primary" onClick={fetchTokenURI} sx={{ mt: 2 }}>
+                  <Button variant="outlined" color="primary" onClick={fetchTokenURI} sx={{ mt: 2 }}>
                     Get Token URI
                   </Button>
                   {tokenURI && (
                     <Card sx={{ mt: 3 }}>
                       <CardContent>
                         <Typography variant="h6">Token URI:</Typography>
-                        <Typography variant="body1" color="textSecondary">{tokenURI}</Typography>
+                        <Typography variant="body1" color="textSecondary">
+                          {tokenURI}
+                          <Tooltip title="Copy to clipboard" placement="top">
+                            <IconButton
+                              aria-label="copy token URI"
+                              onClick={handleCopyTokenURI}
+                              edge="end"
+                              sx={{ ml: 1 }}
+                            >
+                            <ContentCopy />
+                            </IconButton>
+                          </Tooltip>
+                        </Typography>
+                        <Button variant="text" color="primary" onClick={getMetadata} sx={{ mt: 2 }}>
+                          Get Metadata and Image
+                        </Button>
+                        {tokenMetadata && (
+                          <Card sx={{ mt: 3 }}>
+                            <CardContent>
+                              <>
+                                <Typography variant="h6">Metadata:</Typography>
+                                <TextField
+                                  fullWidth
+                                  multiline
+                                  rows={4}
+                                  value={tokenMetadata}
+                                  variant="outlined"
+                                  margin="normal"
+                                  InputProps={{ readOnly: true }}
+                                />
+                              </>
+                              <Divider sx={{ my: 2 }} />
+                              <>
+                                <Typography variant="h6">Image:</Typography>
+                                <CardMedia
+                                  component="img"
+                                  image={JSON.parse(tokenMetadata).image}
+                                  alt="NFT Image"
+                                  sx={{ mt: 2 }}
+                                />
+                              </>
+                            </CardContent>
+                          </Card>
+                        )}
                       </CardContent>
                     </Card>
                   )}
@@ -322,9 +406,10 @@ const ContractAccessor: React.FC = () => {
                 <TextField
                   label="Transfer Amount"
                   value={transferAmount}
-                  onChange={(e) => setTransferAmount(e.target.value)}
+                  onChange={(e) => setTransferAmount(Number(e.target.value))}
                   fullWidth
                   sx={{ mt: 3 }}
+                  type="number"
                 />
               </Tooltip>
               <Button variant="contained" color="primary" onClick={transferTokens} sx={{ mt: 2 }}>

@@ -11,7 +11,7 @@ const CONTRACT_NAMES = {
 
 const ContractDeployer: React.FC = () => {
   const [contractName, setContractName] = useState<string>(CONTRACT_NAMES.TOKEN); // デフォルトを 'MyToken' に設定
-  const [initialOwnerAddress, setInitialOwnerAddress] = useState<string | null>(null);
+  const [initialOwnerAddress, setInitialOwnerAddress] = useState<string>('');
   const [contractAddress, setContractAddress] = useState<string | null>(null);
   const [transactionHash, setTransactionHash] = useState<string | null>(null);
   const [abi, setAbi] = useState<string | null>(null);
@@ -32,7 +32,7 @@ const ContractDeployer: React.FC = () => {
   const handleContractNameChange = (e: SelectChangeEvent<string>) => {
     const selectedContractName = e.target.value as string;
     setContractName(selectedContractName);
-    setInitialOwnerAddress(null);
+    setInitialOwnerAddress('');
     setContractAddress(null);
     setTransactionHash(null);
     setAbi(null);
