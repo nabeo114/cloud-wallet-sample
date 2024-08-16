@@ -52,6 +52,28 @@ async function transferTokens(recipientAddress, transferAmount) {
   }
 }
 
+// NFTをミントする非同期関数
+async function mintNFT(recipientAddress) {
+  try {
+    // コントラクトオブジェクトの生成
+    const contract = await createContract('MyNFT');
+
+    // NFTをミント（コントラクトのメソッドを実行）
+    const tx = await contract.safeMint(recipientAddress);
+
+    // トランザクションの確認
+    await tx.wait();
+
+    console.log(`Minted NFT to ${recipientAddress}`);
+    console.log(`Transaction hash: ${tx.hash}`);
+
+    return tx.hash;
+  } catch (error) {
+    throw new Error(`Failed to mint NFT: ${error.message}`);
+  }
+}
+
 module.exports = {
   transferTokens,
+  mintNFT,
 };

@@ -1,5 +1,0 @@
-{
-  "name": "Sample NFT #0",
-  "description": "This is a sample NFT for demonstration purposes. It showcases the basic structure of an NFT's metadata, including a sample image and descriptive text.",
-  "image": "http://localhost:5000/assets/0.jpeg"
-}

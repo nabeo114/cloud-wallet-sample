@@ -5,8 +5,8 @@ const { generateWallet, getWalletInfo } = require('./scripts/walletUtils');
 const { compileContracts } = require('./scripts/compile');
 const { deployContract } = require('./scripts/deploy');
 const { getContractInfo } = require('./scripts/contractUtils');
-const { transferTokens } = require('./scripts/contractMethods');
-const { getAssetInfo } = require('./scripts/assetUtils');
+const { transferTokens, mintNFT } = require('./scripts/contractMethods');
+const { generateNFTMetadata, generateNFTImage } = require('./scripts/assetUtils');
 
 const app = express();
 const port = 5000;
@@ -89,16 +89,47 @@ app.post('/transfer-tokens', async (req, res) => {
   }
 });
 
+// NFTをミントするエンドポイント
+app.post('/mint-nft', async (req, res) => {
+  const { recipientAddress } = req.body;
+
+  try {
+    const txHash = await mintNFT(recipientAddress);
+    if (!txHash) {
+      return res.status(500).json({ error: 'Failed to mint NFT' });
+    }
+    res.status(200).json({ transactionHash: txHash });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // NFTメタデータを取得するエンドポイント
-app.get('/assets/:tokenId', async (req, res) => {
+app.get('/assets/metadata/:tokenId', async (req, res) => {
   const { tokenId } = req.params;
 
   try {
-    const assetData = await getAssetInfo(tokenId);
-    if (!assetData) {
-      return res.status(404).json({ error: 'Asset not found' });
+    const metadata = await generateNFTMetadata(tokenId);
+    if (!metadata) {
+      return res.status(404).json({ error: 'Metadata not found' });
     }
-    res.json(assetData);
+    res.json(metadata);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// NFT画像データを取得するエンドポイント
+app.get('/assets/image/:imageFile', async (req, res) => {
+  const { imageFile } = req.params;
+
+  try {
+    const imageData = await generateNFTImage(imageFile);
+    if (!imageData) {
+      return res.status(404).json({ error: 'Image not found' });
+    }
+    res.setHeader('Content-Type', 'image/png');
+    res.send(imageData);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
