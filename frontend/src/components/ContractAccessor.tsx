@@ -437,19 +437,30 @@ const ContractAccessor: React.FC = () => {
             <Card sx={{ mt: 3 }}>
               <CardContent>
                 <Typography variant="h6">Transaction Hash:</Typography>
-                <Typography variant="body1" color="textSecondary">
-                  {transactionHash}
-                  <Tooltip title="Copy to clipboard" placement="top">
-                    <IconButton
-                      aria-label="copy transaction hash"
-                      onClick={handleCopyTransactionHash}
-                      edge="end"
-                      sx={{ ml: 1 }}
+                <div>
+                  <Typography variant="body1" color="textSecondary">
+                    {transactionHash}
+                    <Tooltip title="Copy to clipboard" placement="top">
+                      <IconButton
+                        aria-label="copy transaction hash"
+                        onClick={handleCopyTransactionHash}
+                        edge="end"
+                        sx={{ ml: 1 }}
+                      >
+                        <ContentCopy />
+                      </IconButton>
+                    </Tooltip>
+                  </Typography>
+                  <Typography variant="body2" color="primary">
+                    <a
+                      href={`https://www.oklink.com/amoy/tx/${transactionHash}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
                     >
-                    <ContentCopy />
-                    </IconButton>
-                  </Tooltip>
-                </Typography>
+                      View on Amoy Explorer
+                    </a>
+                  </Typography>
+                </div>
               </CardContent>
             </Card>
           )}

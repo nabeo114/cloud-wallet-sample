@@ -110,19 +110,30 @@ const WalletGenerator: React.FC = () => {
             {address && (
               <>
                 <Typography variant="h6">Address:</Typography>
-                <Typography variant="body1" color="textSecondary">
-                  {address}
-                  <Tooltip title="Copy to clipboard" placement="top">
-                    <IconButton
-                      aria-label="copy wallet address"
-                      onClick={handleCopyAddress}
-                      edge="end"
-                      sx={{ ml: 1 }}
+                <div>
+                  <Typography variant="body1" color="textSecondary">
+                    {address}
+                    <Tooltip title="Copy to clipboard" placement="top">
+                      <IconButton
+                        aria-label="copy wallet address"
+                        onClick={handleCopyAddress}
+                        edge="end"
+                        sx={{ ml: 1 }}
+                      >
+                        <ContentCopy />
+                      </IconButton>
+                    </Tooltip>
+                  </Typography>
+                  <Typography variant="body2" color="primary">
+                    <a
+                      href={`https://www.oklink.com/amoy/address/${address}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
                     >
-                    <ContentCopy />
-                    </IconButton>
-                  </Tooltip>
-                </Typography>
+                      View on Amoy Explorer
+                    </a>
+                  </Typography>
+                </div>
               </>
             )}
             <Divider sx={{ my: 2 }} />
