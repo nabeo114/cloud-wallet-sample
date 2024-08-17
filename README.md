@@ -1,6 +1,12 @@
 # Cloud Wallet Sample
 
-This project demonstrates a cloud-based wallet application, combining a backend built with Node.js and a frontend developed in TypeScript. The application allows users to create and manage wallets, with functionalities likely related to blockchain technology.
+This project demonstrates a cloud-based wallet application, combining a backend built with Node.js and a frontend developed in TypeScript. The application provides the following functionalities:
+
+- **Server-Side Wallet Creation**: Create Ethereum wallet accounts on the server side.
+- **Contract Deployment**: Deploy smart contracts using the created wallet accounts on the server side.
+- **Method Execution**: Execute methods on the deployed contracts from both the frontend and backend.
+
+The application allows users to manage their wallets and interact with deployed smart contracts, integrating blockchain technology seamlessly into both the frontend and backend components.
 
 ## Prerequisites
 
@@ -23,13 +29,13 @@ This project demonstrates a cloud-based wallet application, combining a backend 
 ## Features
 
 - **Wallet Management:** Create and manage cryptocurrency wallets.
-- **Backend:** Node.js server for handling wallet operations.
-  - Create a wallet account on the server side.
-  - Deploy contracts using the account on the server side.
-  - Support for ERC20 and ERC721 contracts.
+- **Backend:**
+  - Create Ethereum wallet accounts on the server side.
+  - Deploy ERC20 and ERC721 smart contracts using the created wallet accounts.
   - Execute methods that trigger transactions on the contracts (e.g., token transfers, NFT mints).
   - **Note**: Contracts are deployed on the Polygon Amoy testnet. Before deploying contracts, ensure that the wallet address created on the server has MATIC tokens. You can use the Polygon Faucet to fund the address: [Polygon Faucet](https://faucet.polygon.technology/).
-- **Frontend:** TypeScript-based interface for user interaction.
+- **Frontend:**
+  - TypeScript-based interface for user interaction.
   - Execute non-transactional methods on the contracts using their addresses and ABIs.
 
 ## Installation
@@ -65,6 +71,7 @@ npm start
 ## Usage
 
 After installation, the backend and frontend will be running on their respective ports:
+
 - **Frontend:** Access the application at `http://localhost:8080/`.
 - **Backend:** The server will be running at `http://localhost:5000/`.
 
