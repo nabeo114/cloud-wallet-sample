@@ -2,6 +2,24 @@
 
 This project demonstrates a cloud-based wallet application, combining a backend built with Node.js and a frontend developed in TypeScript. The application allows users to create and manage wallets, with functionalities likely related to blockchain technology.
 
+## Prerequisites
+
+- **Git**: Ensure that Git is installed on your system. You can download it from [Git Downloads](https://git-scm.com/downloads).
+- **Node.js**: Install Node.js. It is recommended to use [nvm (Node Version Manager)](https://github.com/nvm-sh/nvm) to manage Node.js versions. First, install `nvm` using the following command:
+
+  ```bash
+  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+  ```
+
+  After installing `nvm`, install Node.js using these commands:
+
+  ```bash
+  nvm install --lts
+  npm install -g npm
+  ```
+
+- **Windows Users**: If you are using Windows, it is recommended to use WSL2 with an Ubuntu environment. Follow the [WSL2 Installation Guide](https://learn.microsoft.com/en-us/windows/wsl/install) to set up WSL2 and install Ubuntu.
+
 ## Features
 
 - **Wallet Management:** Create and manage cryptocurrency wallets.
