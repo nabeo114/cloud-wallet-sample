@@ -19,11 +19,13 @@ const ContractAccessor: React.FC = () => {
   const [totalSupply, setTotalSupply] = useState<string | null>(null);
   const [address, setAddress] = useState<string>('');
   const [balance, setBalance] = useState<string | null>(null);
-  const [tokenId, setTokenId] = useState<number>(0);
+  const [uriTokenId, setURITokenId] = useState<number>(0);
   const [tokenURI, setTokenURI] = useState<string | null>(null);
   const [tokenMetadata, setTokenMetadata] = useState<string | null>(null);
-  const [recipientAddress, setRecipientAddress] = useState<string>('');
+  const [transferRecipientAddress, setTransferRecipientAddress] = useState<string>('');
+  const [mintRecipientAddress, setMintRecipientAddress] = useState<string>('');
   const [transferAmount, setTransferAmount] = useState<number>(0);
+  const [transferTokenId, setTransferTokenId] = useState<number>(0);
   const [transactionHash, setTransactionHash] = useState<string | null>(null);
   const [contractError, setContractError] = useState<string | null>(null);
   const [transferError, setTransferError] = useState<string | null>(null);
@@ -47,11 +49,13 @@ const ContractAccessor: React.FC = () => {
     setTotalSupply(null);
     setAddress('');
     setBalance(null);
-    setTokenId(0);
+    setURITokenId(0);
     setTokenURI(null);
     setTokenMetadata(null);
-    setRecipientAddress('');
+    setTransferRecipientAddress('');
+    setMintRecipientAddress('');
     setTransferAmount(0);
+    setTransferTokenId(0);
     setTransactionHash(null);
     setContractError(null);
     setTransferError(null);
@@ -152,7 +156,7 @@ const ContractAccessor: React.FC = () => {
     }
 
     try {
-      const tokenURI = await contract.methods.tokenURI(tokenId).call();
+      const tokenURI = await contract.methods.tokenURI(uriTokenId).call();
       setTokenURI(tokenURI);
     } catch (err) {
       const errorMessage = (err as Error).message;
@@ -197,7 +201,7 @@ const ContractAccessor: React.FC = () => {
   const transferTokens = async () => {
     setTransferError(null);
     setTransactionHash(null);
-    if (!recipientAddress) {
+    if (!transferRecipientAddress) {
       setTransferError('Address not provided');
       return;
     }
@@ -208,7 +212,7 @@ const ContractAccessor: React.FC = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ recipientAddress, transferAmount }),
+        body: JSON.stringify({ transferRecipientAddress, transferAmount }),
       });
 
       if (!response.ok) {
@@ -230,7 +234,7 @@ const ContractAccessor: React.FC = () => {
   const mintNFT = async () => {
     setTransferError(null);
     setTransactionHash(null);
-    if (!recipientAddress) {
+    if (!mintRecipientAddress) {
       setTransferError('Address not provided');
       return;
     }
@@ -241,7 +245,7 @@ const ContractAccessor: React.FC = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ recipientAddress }),
+        body: JSON.stringify({ mintRecipientAddress }),
       });
 
       if (!response.ok) {
@@ -255,6 +259,39 @@ const ContractAccessor: React.FC = () => {
     } catch (error) {
       const errorMessage = (error as Error).message;
       console.error('Error minting NFT:', errorMessage);
+      setTransferError(errorMessage);
+    }
+  }
+
+  // NFTを転送 (ERC721のみ)
+  const transferNFT = async () => {
+    setTransferError(null);
+    setTransactionHash(null);
+    if (!transferRecipientAddress) {
+      setTransferError('Address not provided');
+      return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:5000/transfer-nft', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ transferRecipientAddress, transferTokenId }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        setTransferError(errorData.error);
+        return;
+      }
+
+      const data = await response.json();
+      setTransactionHash(data.transactionHash);
+    } catch (error) {
+      const errorMessage = (error as Error).message;
+      console.error('Error transferring NFT:', errorMessage);
       setTransferError(errorMessage);
     }
   }
@@ -321,8 +358,8 @@ const ContractAccessor: React.FC = () => {
                   <Tooltip title="Please enter the token id for which you want to check the URI." placement="top" arrow>
                     <TextField
                       label="Token ID"
-                      value={tokenId}
-                      onChange={(e) => setTokenId(Number(e.target.value))}
+                      value={uriTokenId}
+                      onChange={(e) => setURITokenId(Number(e.target.value))}
                       fullWidth
                       sx={{ mt: 3 }}
                       type="number"
@@ -396,8 +433,8 @@ const ContractAccessor: React.FC = () => {
               <Tooltip title="Please enter the recipient address to which you want to transfer the tokens." placement="top" arrow>
                 <TextField
                   label="Recipient Address"
-                  value={recipientAddress}
-                  onChange={(e) => setRecipientAddress(e.target.value)}
+                  value={transferRecipientAddress}
+                  onChange={(e) => setTransferRecipientAddress(e.target.value)}
                   fullWidth
                   sx={{ mt: 3 }}
                 />
@@ -422,14 +459,37 @@ const ContractAccessor: React.FC = () => {
               <Tooltip title="Please enter the recipient address to which you want to mint the NFT." placement="top" arrow>
                 <TextField
                   label="Recipient Address"
-                  value={recipientAddress}
-                  onChange={(e) => setRecipientAddress(e.target.value)}
+                  value={mintRecipientAddress}
+                  onChange={(e) => setMintRecipientAddress(e.target.value)}
                   fullWidth
                   sx={{ mt: 3 }}
                 />
               </Tooltip>
               <Button variant="contained" color="primary" onClick={mintNFT} sx={{ mt: 2 }}>
                 Mint NFT
+              </Button>
+              <Divider sx={{ my: 2 }} />
+              <Tooltip title="Please enter the recipient address to which you want to transfer the NFT." placement="top" arrow>
+                <TextField
+                  label="Recipient Address"
+                  value={transferRecipientAddress}
+                  onChange={(e) => setTransferRecipientAddress(e.target.value)}
+                  fullWidth
+                  sx={{ mt: 3 }}
+                />
+              </Tooltip>
+              <Tooltip title="Please enter the token id for which you want to transfer the NFT." placement="top" arrow>
+                <TextField
+                  label="Token ID"
+                  value={transferTokenId}
+                  onChange={(e) => setTransferTokenId(Number(e.target.value))}
+                  fullWidth
+                  sx={{ mt: 3 }}
+                  type="number"
+                />
+              </Tooltip>
+              <Button variant="contained" color="primary" onClick={transferNFT} sx={{ mt: 2 }}>
+                Transfer NFT
               </Button>
             </>
           )}

@@ -24,7 +24,10 @@ async function createContract(contractName) {
     const walletWithProvider = wallet.connect(provider);
 
     // コントラクトオブジェクトを生成
-    return new ethers.Contract(contractData.contractAddress, contractData.abi, walletWithProvider);
+    const contract = new ethers.Contract(contractData.contractAddress, contractData.abi, walletWithProvider);
+
+    // コントラクトとウォレットの両方を返却
+    return { contract, walletWithProvider };
   } catch (error) {
     throw new Error(`Failed to create contract: ${error.message}`);
   }
@@ -33,8 +36,8 @@ async function createContract(contractName) {
 // トークンを転送する非同期関数
 async function transferTokens(recipientAddress, transferAmount) {
   try {
-    // コントラクトオブジェクトの生成
-    const contract = await createContract('MyToken');
+    // コントラクトオブジェクトとウォレットを生成
+    const { contract } = await createContract('MyToken');
 
     // トークンを転送（コントラクトのメソッドを実行）
 //    const txReceipt = await contract.transfer(recipientAddress, ethers.utils.parseUnits(transferAmount, 'ether'));
@@ -55,8 +58,8 @@ async function transferTokens(recipientAddress, transferAmount) {
 // NFTをミントする非同期関数
 async function mintNFT(recipientAddress) {
   try {
-    // コントラクトオブジェクトの生成
-    const contract = await createContract('MyNFT');
+    // コントラクトオブジェクトとウォレットを生成
+    const { contract } = await createContract('MyNFT');
 
     // NFTをミント（コントラクトのメソッドを実行）
     const tx = await contract.safeMint(recipientAddress);
@@ -73,7 +76,32 @@ async function mintNFT(recipientAddress) {
   }
 }
 
+// NFTを転送する非同期関数
+async function transferNFT(recipientAddress, tokenId) {
+  try {
+    // コントラクトオブジェクトとウォレットを生成
+    const { contract, walletWithProvider } = await createContract('MyNFT');
+
+    // メソッドを実行するプロバイダーのアドレス（送信者）を取得
+    const senderAddress = await walletWithProvider.getAddress();
+
+    // NFTを転送（コントラクトのメソッドを実行）
+    const tx = await contract.safeTransferFrom(senderAddress, recipientAddress, tokenId);
+
+    // トランザクションの確認
+    await tx.wait();
+
+    console.log(`Transferred NFT to ${recipientAddress}`);
+    console.log(`Transaction hash: ${tx.hash}`);
+
+    return tx.hash;
+  } catch (error) {
+    throw new Error(`Failed to transfer NFT: ${error.message}`);
+  }
+}
+
 module.exports = {
   transferTokens,
   mintNFT,
+  transferNFT,
 };

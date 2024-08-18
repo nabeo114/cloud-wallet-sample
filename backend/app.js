@@ -5,7 +5,7 @@ const { generateWallet, getWalletInfo } = require('./scripts/walletUtils');
 const { compileContracts } = require('./scripts/compile');
 const { deployContract } = require('./scripts/deploy');
 const { getContractInfo } = require('./scripts/contractUtils');
-const { transferTokens, mintNFT } = require('./scripts/contractMethods');
+const { transferTokens, mintNFT, transferNFT } = require('./scripts/contractMethods');
 const { generateNFTMetadata, generateNFTImage } = require('./scripts/assetUtils');
 
 const app = express();
@@ -76,10 +76,10 @@ app.post('/get-contract-info', async (req, res) => {
 
 // トークンを転送するエンドポイント
 app.post('/transfer-tokens', async (req, res) => {
-  const { recipientAddress, transferAmount } = req.body;
+  const { transferRecipientAddress, transferAmount } = req.body;
 
   try {
-    const txHash = await transferTokens(recipientAddress, transferAmount);
+    const txHash = await transferTokens(transferRecipientAddress, transferAmount);
     if (!txHash) {
       return res.status(500).json({ error: 'Failed to transfer tokens' });
     }
@@ -91,12 +91,27 @@ app.post('/transfer-tokens', async (req, res) => {
 
 // NFTをミントするエンドポイント
 app.post('/mint-nft', async (req, res) => {
-  const { recipientAddress } = req.body;
+  const { mintRecipientAddress } = req.body;
 
   try {
-    const txHash = await mintNFT(recipientAddress);
+    const txHash = await mintNFT(mintRecipientAddress);
     if (!txHash) {
       return res.status(500).json({ error: 'Failed to mint NFT' });
+    }
+    res.status(200).json({ transactionHash: txHash });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// NFTを転送するエンドポイント
+app.post('/transfer-nft', async (req, res) => {
+  const { transferRecipientAddress, transferTokenId } = req.body;
+
+  try {
+    const txHash = await transferNFT(transferRecipientAddress, transferTokenId);
+    if (!txHash) {
+      return res.status(500).json({ error: 'Failed to transfer NFT' });
     }
     res.status(200).json({ transactionHash: txHash });
   } catch (error) {
