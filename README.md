@@ -43,7 +43,7 @@ The application allows users to manage their wallets and interact with deployed 
 ### 1. Clone the Repository:
 
 ```bash
-git clone https://github.com/nabeo114/cloud-wallet-sample.git
+git clone https://github.com/nabeo114/eth-cloud-wallet-sample.git
 ```
 
 ### 2. Backend Setup:
