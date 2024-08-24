@@ -68,6 +68,12 @@ npm install
 npm start
 ```
 
+**Note**: You need to create a `.env` file in the `frontend` directory and set the `INFURA_API_KEY` environment variable. You can use the same `INFURA_API_KEY` value from the backend setup. Set it as follows:
+
+```plaintext
+INFURA_API_KEY=your_infura_api_key_here
+```
+
 ## Usage
 
 After installation, the backend and frontend will be running on their respective ports:

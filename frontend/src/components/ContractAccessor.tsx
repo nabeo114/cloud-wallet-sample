@@ -4,7 +4,7 @@ import { Card, CardContent, CardMedia, Button, TextField, Typography, IconButton
 import { ContentCopy } from '@mui/icons-material';
 import { SelectChangeEvent } from '@mui/material/Select';
 
-const providerUrl = `https://polygon-amoy.infura.io/v3/891caf6a97ed4af6a314a6ba15fd63d1`;
+const providerUrl = `https://polygon-amoy.infura.io/v3/${process.env.REACT_APP_INFURA_API_KEY}`;
 
 // コントラクト名の定数定義
 const CONTRACT_NAMES = {
